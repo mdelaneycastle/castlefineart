@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Find a Gallery — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="galleries">
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Galleries</span></nav>
+      <h1 class="display split">Find a gallery</h1>
+      <p class="lede" style="margin-top:16px">Each of our galleries is unique to its town, with art consultants on hand to help you find the right piece. Search by town, city or postcode — we look forward to seeing you.</p>
+      <div class="gal-search" style="margin-top:32px">
+        <input class="finput" id="find" type="search" placeholder="Town, city or postcode (e.g. York, BN1)" aria-label="Search galleries">
+        <button class="btn btn--ghost" id="openNow">Open now</button>
+      </div>
+      <div class="region-tabs" id="regions"></div>
+    </header>
+    <div class="gal-grid" id="grid"></div>
+  </div>
+  <div style="height:120px"></div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, $$, esc, img } = U;
+  const regions = ['All', ...[...new Set(D.galleries.map(g => g.region))].sort()];
+  let region = 'All', q = U.param('q') || '', openOnly = false;
+  $('#find').value = q;
+  $('#regions').innerHTML = regions.map(r => `<button data-r="${esc(r)}" class="${r === 'All' ? 'on' : ''}">${esc(r)}</button>`).join('');
+
+  function render() {
+    const t = q.toLowerCase().replace(/\s+/g, ' ').trim();
+    const list = D.galleries.filter(g => (region === 'All' || g.region === region)
+      && (!t || (g.n + ' ' + g.addr + ' ' + g.region).toLowerCase().includes(t) || g.pc.toLowerCase().startsWith(t.replace(/\s/g, '')))
+      && (!openOnly || U.openState(g).open));
+    $('#grid').innerHTML = list.map((g, i) => {
+      const o = U.openState(g);
+      return `<a class="gal-card card enter" style="animation-delay:${Math.min(i, 12) * 50}ms" href="gallery.html?g=${g.s}">
+        <div class="gal-card__img">${g.img ? `<img loading="lazy" src="${img(g.img, 800)}" alt="${esc(g.n)} gallery">` : `<span class="ph">${esc(g.n)}</span>`}</div>
+        <h3>${esc(g.n)}</h3><p>${esc(g.addr)}</p>
+        <span class="open-pill${o.open ? '' : ' closed'}"><i></i>${esc(o.label)}</span>
+      </a>`;
+    }).join('') || `<div class="empty"><p class="display" style="font-size:1.8rem;color:var(--ink)">No galleries found</p><p>Try a nearby city, or <a href="contact.html" style="text-decoration:underline">get in touch</a> and we'll point you to the closest one.</p></div>`;
+  }
+  $('#find').oninput = e => { q = e.target.value; render(); };
+  $('#regions').onclick = e => { const b = e.target.closest('button'); if (!b) return; region = b.dataset.r; $$('#regions button').forEach(x => x.classList.toggle('on', x === b)); render(); };
+  $('#openNow').onclick = e => { openOnly = !openOnly; e.currentTarget.classList.toggle('btn--ghost', !openOnly); render(); };
+  render();
+})();
+</script>
+</body>
+</html>

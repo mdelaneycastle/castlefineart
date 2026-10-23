@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Contact Us — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="contact">
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Contact</span></nav>
+      <h1 class="display split">How can we help?</h1>
+      <p class="lede" style="margin-top:16px">Tell us a little about what you're looking for and the right person will get back to you — usually by the next working day, if not sooner.</p>
+    </header>
+
+    <div class="contact-layout" style="padding-bottom:120px">
+      <div id="formWrap">
+        <div id="about" style="display:none;margin-bottom:36px"></div>
+        <form id="form" novalidate>
+          <span class="opt-label">I'd like to…</span>
+          <div class="seg" id="topics" style="margin-bottom:34px"></div>
+          <div class="form">
+            <div class="field"><input id="fn" placeholder=" " required autocomplete="given-name"><label for="fn">First name</label><span class="err">Please add your first name</span></div>
+            <div class="field"><input id="ln" placeholder=" " required autocomplete="family-name"><label for="ln">Last name</label><span class="err">Please add your last name</span></div>
+            <div class="field"><input id="em" type="email" placeholder=" " required autocomplete="email"><label for="em">Email</label><span class="err">Please enter a valid email</span></div>
+            <div class="field"><input id="ph" type="tel" placeholder=" " autocomplete="tel"><label for="ph">Phone (optional)</label></div>
+            <div class="field full"><select id="gal"><option value="">No preference</option></select><label for="gal">Nearest gallery</label></div>
+            <div class="field full"><textarea id="msg" placeholder=" " required></textarea><label for="msg">Your message</label><span class="err">Please tell us how we can help</span></div>
+            <label class="check full" style="margin-top:6px"><input type="checkbox" id="optin"> Keep me updated on new releases and artist events</label>
+            <div class="full" style="margin-top:14px"><button class="btn">Send enquiry</button></div>
+          </div>
+        </form>
+      </div>
+
+      <aside>
+        <div class="ways stagger">
+          <a class="way" href="tel:+441213843007"><span>__phone</span><div><h4>Call us</h4><p>+44 (0)121 384 3007<br>Monday – Friday, 9am – 5:30pm</p></div></a>
+          <a class="way" href="mailto:hello@castlefineart.com"><span>__mail</span><div><h4>Email</h4><p>hello@castlefineart.com</p></div></a>
+          <a class="way" href="galleries.html"><span>__gallery</span><div><h4>Visit a gallery</h4><p id="galN">Over 30 galleries across the UK</p></div></a>
+          <a class="way" href="?topic=consultant"><span>__chat</span><div><h4>Talk to an art consultant</h4><p>Personal advice on choosing, framing and hanging your art.</p></div></a>
+        </div>
+        <div style="margin-top:40px;padding:28px;background:var(--cotton)">
+          <p class="eyebrow">Head office</p>
+          <p style="margin:0">Castle Fine Art<br>Unit 29-31, Level 2, The Mailbox<br>Wharfside, Birmingham B1 1RD</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, $$, esc, img, ICON } = U;
+  $$('.way span').forEach(s => s.outerHTML = ICON[s.textContent.slice(2)]);
+  $('#galN').textContent = `${D.galleries.length} galleries across the UK`;
+
+  const TOPICS = [['general', 'Ask a question'], ['consultant', 'Talk to a consultant'], ['viewing', 'Book a viewing'], ['order', 'Ask about an order'], ['submit', 'Submit my art'], ['press', 'Press enquiry']];
+  const want = U.param('topic') || 'general';
+  $('#topics').innerHTML = TOPICS.map(([k, l]) => `<label><input type="radio" name="topic" value="${k}"${k === want ? ' checked' : ''}><span>${l}</span></label>`).join('');
+  $('#gal').innerHTML += D.galleries.map(g => `<option value="${g.s}"${g.s === U.param('g') ? ' selected' : ''}>${esc(g.n)}</option>`).join('');
+
+  // Arrived from a product or artist page: show what they're asking about and prefill the message
+  const p = U.byHandle.get(U.param('p')), a = U.bySlug.get(U.param('artist'));
+  if (p) {
+    $('#about').style.display = 'grid';
+    $('#about').innerHTML = `<div class="line" style="border:1px solid var(--line);padding:16px;grid-template-columns:90px 1fr"><div class="line__img"><img src="${img(p.img[0], 200)}" alt=""></div><div><span class="eyebrow" style="margin:0">Enquiring about</span><h5>${esc(p.t)}</h5><div class="muted">${esc(p.a)} · ${U.money(p.p)}</div></div></div>`;
+    $('#msg').value = `Hello, I'm interested in "${p.t}" by ${p.a}. Could you tell me more about it?`;
+  } else if (a) {
+    $('#msg').value = `Hello, I'd like to hear about new releases and available work by ${a.n}.`;
+  }
+
+  $('#form').addEventListener('submit', e => {
+    e.preventDefault();
+    let ok = true;
+    [['fn', v => v.trim()], ['ln', v => v.trim()], ['em', v => /^\S+@\S+\.\S+$/.test(v)], ['msg', v => v.trim()]].forEach(([id, test]) => {
+      const f = $('#' + id).closest('.field'), good = !!test($('#' + id).value);
+      f.classList.toggle('bad', !good); if (!good && ok) { $('#' + id).focus(); ok = false; }
+    });
+    if (!ok) return;
+    const topic = TOPICS.find(t => t[0] === $('input[name=topic]:checked').value)[1].toLowerCase();
+    $('#formWrap').innerHTML = `<div class="success">
+      <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" style="stroke-dasharray:190;stroke-dashoffset:190;animation:draw 1.2s var(--ease) forwards"/><path d="M20 33l8 8 16-17"/></svg>
+      <h2 class="display" style="margin-top:24px">Thank you, ${esc($('#fn').value.trim())}</h2>
+      <p class="lede" style="margin:14px auto 30px">We've received your request to ${esc(topic)}. Someone from the team will be in touch by the next working day.</p>
+      <p class="muted" style="font-size:.8rem">(Test site — nothing has actually been sent.)</p>
+      <a class="btn btn--ghost" href="shop.html?sort=new">Keep browsing</a></div>`;
+    scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  $$('.field input, .field textarea').forEach(i => i.addEventListener('input', () => i.closest('.field').classList.remove('bad')));
+})();
+</script>
+</body>
+</html>

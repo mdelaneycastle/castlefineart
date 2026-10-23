@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Shop Art — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="shop">
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span id="crumb">Shop</span></nav>
+      <h1 class="display" id="title">All artwork</h1>
+      <p class="lede" id="intro" style="margin-top:16px"></p>
+    </header>
+
+    <div class="shop">
+      <aside class="filters" id="filters" aria-label="Filters">
+        <button class="filters__close" id="fclose">Close filters ×</button>
+        <div class="fgroup"><h4>Search</h4><input class="finput" id="fq" type="search" placeholder="Title, artist or subject"></div>
+        <div class="fgroup"><h4>Type</h4><div id="ftype"></div></div>
+        <div class="fgroup"><h4>Price</h4><div id="fprice"></div></div>
+        <div class="fgroup"><h4>Artist <button id="aclear" class="muted" style="font-size:.7rem;letter-spacing:.1em" hidden>Clear</button></h4>
+          <input class="finput" id="afind" placeholder="Find an artist" style="margin-bottom:10px">
+          <div class="fscroll" id="fartist"></div></div>
+        <div class="fgroup"><label class="check"><input type="checkbox" id="favail"> In stock only</label></div>
+      </aside>
+
+      <section aria-label="Results">
+        <div class="toolbar">
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn--ghost filters-toggle" id="fopen" style="min-height:42px;padding:0 18px">Filters</button>
+            <span class="count" id="count"></span>
+            <div class="chips" id="chips"></div>
+          </div>
+          <select class="select" id="sort" aria-label="Sort by">
+            <option value="featured">Featured</option>
+            <option value="new">Newest first</option>
+            <option value="low">Price: low to high</option>
+            <option value="high">Price: high to low</option>
+            <option value="az">Artist A–Z</option>
+          </select>
+        </div>
+        <div class="grid" id="grid"></div>
+        <div class="more" id="more"></div>
+      </section>
+    </div>
+  </div>
+  <div style="height:100px"></div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, $$, esc, money, param } = U;
+  const PAGE = 24;
+  const PRICES = [['Under £500', 0, 500], ['£500 – £1,000', 500, 1000], ['£1,000 – £2,500', 1000, 2500], ['£2,500 – £5,000', 2500, 5000], ['£5,000+', 5000, 1e9]];
+  const TYPES = [...new Set(D.products.map(p => p.ty))].sort();
+
+  const state = {
+    q: param('q') || '', types: new Set(param('type') ? [param('type')] : []),
+    artists: new Set(param('artist') ? [param('artist')] : []), prices: new Set(), avail: false,
+    sort: param('sort') || 'featured', shown: PAGE,
+  };
+
+  const counts = (key, fn) => { const m = {}; D.products.forEach(p => { const k = fn(p); m[k] = (m[k] || 0) + 1; }); return m; };
+  const tc = counts('ty', p => p.ty);
+  $('#ftype').innerHTML = TYPES.map(t => `<label class="check"><input type="checkbox" value="${esc(t)}" data-f="types"> ${esc(t)}<small>${tc[t]}</small></label>`).join('');
+  $('#fprice').innerHTML = PRICES.map((p, i) => `<label class="check"><input type="checkbox" value="${i}" data-f="prices"> ${p[0]}</label>`).join('');
+  const artists = D.artists.filter(a => a.count).sort((a, b) => a.n.localeCompare(b.n));
+  $('#fartist').innerHTML = artists.map(a => `<label class="check" data-name="${esc(a.n.toLowerCase())}"><input type="checkbox" value="${a.s}" data-f="artists"> ${esc(a.n)}<small>${a.count}</small></label>`).join('');
+  $('#afind').oninput = e => { const t = e.target.value.toLowerCase(); $$('#fartist .check').forEach(l => l.hidden = !l.dataset.name.includes(t)); };
+
+  function sync() {
+    $$('[data-f]').forEach(i => i.checked = state[i.dataset.f].has(i.value));
+    $('#fq').value = state.q; $('#sort').value = state.sort; $('#favail').checked = state.avail;
+    $('#aclear').hidden = !state.artists.size;
+  }
+
+  function filtered() {
+    const words = state.q.toLowerCase().split(/\s+/).filter(Boolean);
+    let r = D.products.filter(p =>
+      (!state.types.size || state.types.has(p.ty)) &&
+      (!state.artists.size || state.artists.has(p.as)) &&
+      (!state.avail || p.av) &&
+      (!state.prices.size || [...state.prices].some(i => p.p >= PRICES[i][1] && p.p < PRICES[i][2])) &&
+      (!words.length || words.every(w => (p.t + ' ' + p.a + ' ' + p.ty + ' ' + (p.sub || []).join(' ')).toLowerCase().includes(w))));
+    const s = state.sort;
+    if (s === 'new') r = r.slice().sort((a, b) => b.date.localeCompare(a.date));
+    if (s === 'low') r = r.slice().sort((a, b) => a.p - b.p);
+    if (s === 'high') r = r.slice().sort((a, b) => b.p - a.p);
+    if (s === 'az') r = r.slice().sort((a, b) => a.a.localeCompare(b.a) || a.t.localeCompare(b.t));
+    if (s === 'featured') {
+      // Round-robin across artists (newest first within each) so the grid reads like a curated wall
+      const by = new Map(); r.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(p => { if (!by.has(p.as)) by.set(p.as, []); by.get(p.as).push(p); });
+      const queues = [...by.values()]; r = [];
+      for (let i = 0; queues.some(q => q.length); i++) queues.forEach(q => q.length && r.push(q.shift()));
+    }
+    return r;
+  }
+
+  function heading() {
+    const one = state.artists.size === 1 ? U.bySlug.get([...state.artists][0]) : null;
+    const ty = state.types.size === 1 ? [...state.types][0] : null;
+    let t = 'All artwork', intro = 'Limited editions, originals and sculpture from the artists we represent — every piece hand-finished and delivered free in the UK.';
+    if (one) { t = one.n; intro = (one.bio[0] || '').slice(0, 220) + (one.bio[0]?.length > 220 ? '…' : ''); }
+    else if (ty === 'Original') { t = 'Original artworks'; intro = 'One of a kind. Each original is hand-painted or hand-made by the artist — once it’s gone, it’s gone.'; }
+    else if (ty === 'Limited Edition') { t = 'Limited editions'; intro = 'Hand-embellished and numbered editions, made to order in Birmingham with a certificate of authenticity.'; }
+    else if (ty === 'Sculpture') { t = 'Sculpture'; intro = 'Bronze, resin, steel and glass — three-dimensional works for shelf, plinth and wall.'; }
+    if (state.q) t = `“${state.q}”`;
+    $('#title').textContent = t; $('#crumb').textContent = t.replace(/[“”]/g, '');
+    $('#intro').textContent = state.q ? '' : intro;
+    document.title = t + ' — Castle Fine Art';
+  }
+
+  function chips() {
+    const c = [];
+    if (state.q) c.push(['q', '', `“${state.q}”`]);
+    state.types.forEach(v => c.push(['types', v, v]));
+    state.artists.forEach(v => c.push(['artists', v, U.bySlug.get(v)?.n || v]));
+    state.prices.forEach(v => c.push(['prices', v, PRICES[v][0]]));
+    if (state.avail) c.push(['avail', '', 'In stock']);
+    $('#chips').innerHTML = c.map(([k, v, l]) => `<button class="chip" data-k="${k}" data-v="${esc(v)}">${esc(l)} <span aria-hidden="true">×</span></button>`).join('') +
+      (c.length > 1 ? `<button class="chip" data-k="all" style="border-color:transparent;text-decoration:underline">Clear all</button>` : '');
+  }
+
+  function url() {
+    const p = new URLSearchParams();
+    if (state.q) p.set('q', state.q);
+    if (state.types.size === 1) p.set('type', [...state.types][0]);
+    if (state.artists.size === 1) p.set('artist', [...state.artists][0]);
+    if (state.sort !== 'featured') p.set('sort', state.sort);
+    history.replaceState(null, '', 'shop.html' + (p.toString() ? '?' + p : ''));
+  }
+
+  let prev = 0;
+  function render(soft) {
+    const r = filtered(), g = $('#grid');
+    const draw = () => {
+      const from = soft ? prev : 0, n = Math.min(state.shown, r.length);
+      const html = r.slice(from, n).map((p, i) => U.cardHtml(p, { enter: true, delay: i * 45 })).join('');
+      if (soft) g.insertAdjacentHTML('beforeend', html); else g.innerHTML = html || `<div class="empty"><p class="display" style="font-size:1.8rem;color:var(--ink)">Nothing matches just yet</p><p>Try removing a filter — or <a href="contact.html?topic=consultant" style="text-decoration:underline">ask a consultant</a> to find it for you.</p></div>`;
+      prev = n;
+      $('#count').textContent = `${r.length} artwork${r.length === 1 ? '' : 's'}`;
+      $('#more').innerHTML = r.length > n ? `<span class="count">Showing ${n} of ${r.length}</span><div class="bar"><i style="width:${n / r.length * 100}%"></i></div><button class="btn btn--ghost" id="loadMore">Load more</button>` : (r.length > PAGE ? `<span class="count">You've seen all ${r.length}</span>` : '');
+      $('#loadMore') && ($('#loadMore').onclick = () => { state.shown += PAGE; render(true); });
+      g.classList.remove('fading');
+    };
+    if (soft) draw(); else { g.classList.add('fading'); setTimeout(draw, 180); }
+    heading(); chips(); url(); sync();
+  }
+
+  const change = () => { state.shown = PAGE; render(); };
+  document.addEventListener('change', e => {
+    const i = e.target;
+    if (i.dataset.f) { state[i.dataset.f][i.checked ? 'add' : 'delete'](i.value); change(); }
+    if (i.id === 'favail') { state.avail = i.checked; change(); }
+    if (i.id === 'sort') { state.sort = i.value; change(); }
+  });
+  let t; $('#fq').oninput = e => { clearTimeout(t); t = setTimeout(() => { state.q = e.target.value.trim(); change(); }, 250); };
+  $('#aclear').onclick = () => { state.artists.clear(); change(); };
+  $('#chips').onclick = e => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    const k = c.dataset.k, v = c.dataset.v;
+    if (k === 'all') { state.q = ''; state.types.clear(); state.artists.clear(); state.prices.clear(); state.avail = false; }
+    else if (k === 'q') state.q = ''; else if (k === 'avail') state.avail = false; else state[k].delete(v);
+    change();
+  };
+  $('#fopen').onclick = () => { $('#filters').classList.add('open'); U.scrim.classList.add('on'); U.lock(true); };
+  $('#fclose').onclick = U.closeAll;
+
+  render();
+})();
+</script>
+</body>
+</html>

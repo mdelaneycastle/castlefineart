@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Gallery — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="galleries">
+<main id="main">
+  <section class="gal-hero" id="hero"></section>
+  <div class="wrap section">
+    <div class="gal-detail">
+      <div id="about"></div>
+      <aside class="info-card" id="info"></aside>
+    </div>
+  </div>
+  <section class="section section--cotton">
+    <div class="wrap">
+      <div class="section__head"><div><p class="eyebrow">Nearby</p><h2 class="display">More galleries</h2></div><a class="link-arrow" href="galleries.html">All galleries →</a></div>
+      <div class="gal-grid" id="near"></div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, esc, img, ICON } = U;
+  const g = D.galleries.find(x => x.s === U.param('g')) || D.galleries[0];
+  document.title = `${g.n} Gallery — Castle Fine Art`;
+  const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const today = (new Date().getDay() + 6) % 7;
+  const o = U.openState(g);
+
+  $('#hero').innerHTML = `${g.img ? `<img src="${img(g.img, 2000)}" alt="">` : ''}
+    <div class="gal-hero__copy"><div class="wrap">
+      <nav class="crumbs" style="color:rgba(255,255,255,.75)"><a href="index.html">Home</a><span>/</span><a href="galleries.html">Galleries</a><span>/</span><span>${esc(g.n)}</span></nav>
+      <p class="eyebrow">Castle Fine Art · ${esc(g.region)}</p>
+      <h1 class="display split">${esc(g.n)}</h1>
+      <span class="open-pill${o.open ? '' : ' closed'}" style="color:#fff;margin-top:18px"><i></i>${esc(o.label)}</span>
+    </div></div>`;
+
+  $('#about').innerHTML = `<div class="reveal">
+      <p class="eyebrow">About the gallery</p>
+      <h2 class="display">Welcome to ${esc(g.n)}</h2>
+      ${(g.desc || ['Our gallery team would love to welcome you — pop in to browse, or book a private viewing with one of our art consultants.']).map(p => `<p class="lede" style="margin-top:18px">${esc(p)}</p>`).join('')}
+      ${g.manager ? `<p style="margin-top:28px"><span class="eyebrow" style="display:block;margin-bottom:4px">Gallery manager</span><span class="display" style="font-size:1.5rem">${esc(g.manager)}</span></p>` : ''}
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:32px">
+        <a class="btn" href="contact.html?topic=viewing&g=${g.s}">Book a private viewing</a>
+        <a class="btn btn--ghost" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Castle Fine Art ' + g.addr)}" target="_blank" rel="noopener">Get directions</a>
+      </div>
+      <iframe class="map" loading="lazy" title="Map of ${esc(g.n)} gallery" src="https://maps.google.com/maps?q=${encodeURIComponent('Castle Fine Art, ' + g.addr)}&z=16&output=embed"></iframe>
+    </div>`;
+
+  $('#info').innerHTML = `
+    <h4>Address</h4><address>Castle Fine Art<br>${esc(g.addr).replace(/, /g, '<br>')}</address>
+    ${g.phone ? `<h4>Telephone</h4><a href="tel:${g.phone.replace(/\s/g, '')}" style="display:flex;gap:10px;align-items:center">${esc(g.phone)}</a>` : ''}
+    ${g.email ? `<h4>Email</h4><a href="mailto:${g.email}" style="text-decoration:underline">${esc(g.email)}</a>` : ''}
+    ${g.hours?.length === 7 ? `<h4>Opening hours</h4><table class="hours">${g.hours.map((h, i) => `<tr class="${i === today ? 'today' : ''}"><td>${DAYS[i]}</td><td>${esc(h.replace(/AM/g, 'am').replace(/PM/g, 'pm'))}</td></tr>`).join('')}</table>` : ''}
+    ${g.parking ? `<h4>Closest car park</h4><p style="margin:0">${esc(g.parking)}</p>` : ''}`;
+
+  // Nearest by postcode area, else same region
+  const area = s => (s.pc.match(/^[A-Z]+/) || [''])[0];
+  const near = D.galleries.filter(x => x.s !== g.s).sort((a, b) => (b.region === g.region) - (a.region === g.region) || (area(b) === area(g)) - (area(a) === area(g))).slice(0, 3);
+  $('#near').innerHTML = near.map(x => `<a class="gal-card card" href="gallery.html?g=${x.s}"><div class="gal-card__img">${x.img ? `<img loading="lazy" src="${img(x.img, 800)}" alt="">` : `<span class="ph">${esc(x.n)}</span>`}</div><h3>${esc(x.n)}</h3><p>${esc(x.addr)}</p></a>`).join('');
+  U.observe();
+  requestAnimationFrame(() => document.querySelector('.gal-hero .split')?.classList.add('in'));
+})();
+</script>
+</body>
+</html>

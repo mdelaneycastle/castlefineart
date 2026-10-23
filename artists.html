@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Our Artists — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="artists">
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span>/</span><span>Artists</span></nav>
+      <h1 class="display split">Our artists</h1>
+      <p class="lede" style="margin-top:16px">From household names to the new generation of talent we've discovered and championed — meet the artists behind the work.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:32px;align-items:center">
+        <input class="finput" id="find" type="search" placeholder="Search artists" style="max-width:320px" aria-label="Search artists">
+        <div class="region-tabs" style="margin:0" id="mode">
+          <button class="on" data-m="all">All artists</button>
+          <button data-m="featured">Featured</button>
+        </div>
+      </div>
+    </header>
+    <div class="az" id="az" aria-label="Jump to letter"></div>
+    <div id="list"></div>
+  </div>
+  <div style="height:100px"></div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, $$, esc, img } = U;
+  const all = D.artists.filter(a => a.count || a.portrait).sort((a, b) => a.sort.localeCompare(b.sort));
+  let mode = 'all', q = '';
+
+  function card(a) {
+    const pic = a.portrait || (a.img ? img(a.img, 600) : '');
+    return `<a class="artist-card" href="artist.html?a=${a.s}">
+      <div class="artist-card__img">${pic ? `<img loading="lazy" src="${pic}" alt="${esc(a.n)}"${a.portrait ? '' : ' style="object-position:center"'}>` : `<span class="initial">${esc(a.n[0])}</span>`}</div>
+      <h3>${esc(a.n)}</h3><p>${a.count ? `${a.count} artwork${a.count === 1 ? '' : 's'}` : 'Coming soon'}</p></a>`;
+  }
+
+  function render() {
+    const t = q.toLowerCase();
+    const list = all.filter(a => (mode === 'all' || a.featured) && (!t || a.n.toLowerCase().includes(t)));
+    const groups = {};
+    list.forEach(a => { const L = /[A-Z]/.test(a.sort[0].toUpperCase()) ? a.sort[0].toUpperCase() : '#'; (groups[L] = groups[L] || []).push(a); });
+    $('#az').innerHTML = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(L => `<button ${groups[L] ? `data-l="${L}"` : 'disabled'}>${L}</button>`).join('');
+    $('#list').innerHTML = Object.keys(groups).sort().map(L => `
+      <section class="az-group" id="L-${L}" style="margin-bottom:64px">
+        <p class="az-letter">${L}</p>
+        <div class="artists-grid stagger">${groups[L].map(card).join('')}</div>
+      </section>`).join('') || `<p class="empty">No artists match “${esc(q)}”.</p>`;
+    U.observe($('#list'));
+  }
+  $('#az').onclick = e => { const b = e.target.closest('[data-l]'); if (b) $('#L-' + b.dataset.l).scrollIntoView({ behavior: 'smooth' }); };
+  $('#find').oninput = e => { q = e.target.value.trim(); render(); };
+  $('#mode').onclick = e => { const b = e.target.closest('button'); if (!b) return; mode = b.dataset.m; $$('#mode button').forEach(x => x.classList.toggle('on', x === b)); render(); };
+  render();
+})();
+</script>
+</body>
+</html>

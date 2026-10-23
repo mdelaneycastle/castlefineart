@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>About Us — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="about">
+<main id="main">
+  <div class="wrap">
+    <header class="page-head" style="text-align:center;max-width:900px;margin:0 auto">
+      <p class="eyebrow">Our story</p>
+      <h1 class="display split">Celebrating art for all</h1>
+      <p class="lede" style="margin:22px auto 0">We believe everyone should be able to experience the joy of collecting art. Since 1995 we've grown into the UK's leading art retailer — with galleries nationwide and collectors around the world.</p>
+    </header>
+  </div>
+
+  <section class="section--tight">
+    <div class="wrap"><div class="reveal-img" style="aspect-ratio:21/9"><img id="wide" style="width:100%;height:100%;object-fit:cover" alt="A Castle Fine Art gallery interior"></div></div>
+  </section>
+
+  <section class="section">
+    <div class="wrap split-2">
+      <div class="reveal">
+        <p class="eyebrow">Since 1995</p>
+        <h2 class="display">Thirty years of fantastic art</h2>
+      </div>
+      <div class="reveal">
+        <p class="lede">In 1995 we opened our first gallery in Stratford-upon-Avon with one goal: to make art accessible to all. Today we work with some of the biggest names in art — including Johnny Depp, Marvel and Bob Dylan — alongside homegrown talent whose careers we've helped launch.</p>
+        <p class="lede">Our motto says it simply: Your World, Our Art®.</p>
+        <div class="stats"><div><b id="g">34</b><span>Galleries</span></div><div><b>1995</b><span>Founded</span></div><div><b id="a">100+</b><span>Artists</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cotton">
+    <div class="wrap">
+      <div class="section__head"><div><p class="eyebrow">What we stand for</p><h2 class="display">Our promise</h2></div></div>
+      <div class="values stagger" id="vals"></div>
+    </div>
+  </section>
+
+  <section class="section" id="finance">
+    <div class="wrap split-2">
+      <div class="reveal-img" style="aspect-ratio:4/5"><img id="tall" style="width:100%;height:100%;object-fit:cover" alt=""></div>
+      <div class="reveal">
+        <p class="eyebrow">Buying with confidence</p>
+        <h2 class="display">Payment, delivery &amp; care</h2>
+        <details class="acc" open style="margin-top:28px"><summary>Interest-free finance</summary><div class="acc__body"><p>Spread the cost of your artwork with 0% APR finance and no deposit, subject to status. Available online and in every gallery.</p></div></details>
+        <details class="acc" id="delivery"><summary>Free UK delivery</summary><div class="acc__body"><p>All artwork is made to order in Birmingham and delivered free across the UK. Please allow up to six weeks. International delivery is available on request.</p></div></details>
+        <details class="acc"><summary>Returns</summary><div class="acc__body"><p>If your artwork isn't quite right, most pieces can be returned within 14 days of delivery. Speak to your gallery or our customer team.</p></div></details>
+        <details class="acc"><summary>Framing &amp; craftsmanship</summary><div class="acc__body"><p>Every piece is mounted, glazed or framed by hand, with bespoke framing chosen by our creative department to suit each work.</p></div></details>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, img, ICON } = U;
+  $('#wide').src = img(D.galleryHero, 2000);
+  $('#tall').src = img(D.hero[1 % D.hero.length].src, 1200);
+  $('#g').textContent = D.galleries.length;
+  $('#a').textContent = D.artists.filter(a => a.count).length;
+  $('#vals').innerHTML = [
+    [ICON.gallery, 'Welcoming', 'Castle spirit, warmth and friendship in every gallery.'],
+    [ICON.spark, 'Accessible', 'Art for everyone — first-time buyer or seasoned collector.'],
+    [ICON.frame, 'Quality', 'The finest processes, materials and artistic direction.'],
+    [ICON.chat, 'Knowledgeable', 'Over 30 years of experience and dedicated art consultants.'],
+  ].map(([i, h, p]) => `<div>${i}<h4>${h}</h4><p>${p}</p></div>`).join('');
+  if (location.hash === '#delivery') $('#delivery').open = true;
+  U.observe();
+})();
+</script>
+</body>
+</html>

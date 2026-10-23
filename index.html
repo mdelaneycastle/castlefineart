@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Castle Fine Art — Your World, Our Art</title>
+<meta name="description" content="The UK's leading limited edition print and original art retailer, with galleries nationwide.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="home">
+<main id="main">
+
+  <section class="hero" aria-label="Featured artwork">
+    <div id="slides"></div>
+    <div class="hero__copy">
+      <div class="wrap">
+        <p class="eyebrow">Since 1995 · Your World, Our Art®</p>
+        <h1 class="display split">Art for every home, chosen with care</h1>
+        <div class="hero__meta">
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a class="btn btn--light" href="shop.html?sort=new">Shop new arrivals</a>
+            <a class="btn btn--ghost" style="color:#fff;border-color:#fff" href="galleries.html">Visit a gallery</a>
+          </div>
+          <div style="display:grid;gap:14px;justify-items:end">
+            <a class="hero__caption" id="caption" href="#"></a>
+            <div class="hero__dots" id="dots"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section--tight" style="border-bottom:1px solid var(--line)">
+    <div class="wrap values stagger" id="values"></div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <div><p class="eyebrow">Just released</p><h2 class="display split">New arrivals</h2></div>
+        <div style="display:flex;gap:24px;align-items:center">
+          <a class="link-arrow" href="shop.html?sort=new">View all →</a>
+          <div class="rail-nav" id="newNav"><button data-dir="-1" aria-label="Previous"></button><button data-dir="1" aria-label="Next"></button></div>
+        </div>
+      </div>
+      <div class="rail" id="newRail" data-nav="#newNav"></div>
+    </div>
+  </section>
+
+  <section class="section section--cotton">
+    <div class="wrap">
+      <div class="section__head">
+        <div><p class="eyebrow">Find your piece</p><h2 class="display split">Shop by collection</h2></div>
+        <p class="lede" style="max-width:44ch;margin:0">Limited editions hand-finished in our Birmingham studio, one-of-a-kind originals, and sculpture in bronze, resin and steel.</p>
+      </div>
+      <div class="tiles" id="tiles"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap feature" id="spotlight"></div>
+  </section>
+
+  <div class="marquee" aria-label="Our artists"><div class="marquee__track" id="marquee"></div></div>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <div><p class="eyebrow">Handpicked</p><h2 class="display split">Original works</h2></div>
+        <a class="link-arrow" href="shop.html?type=Original">All originals →</a>
+      </div>
+      <div class="grid stagger" id="origGrid"></div>
+    </div>
+  </section>
+
+  <section class="section section--cotton">
+    <div class="wrap split-2">
+      <div class="reveal-img" style="aspect-ratio:5/4"><img id="galImg" style="width:100%;height:100%;object-fit:cover" alt="Inside a Castle Fine Art gallery"></div>
+      <div class="reveal">
+        <p class="eyebrow">Come and see it in person</p>
+        <h2 class="display">A gallery near you</h2>
+        <p class="lede" style="margin-top:18px">Every one of our galleries is unique to its town, with art consultants who'll help you find the right piece, the right frame and the right wall for it — no pressure, just good conversation about art.</p>
+        <div class="stats"><div><b id="galCount">34</b><span>Galleries</span></div><div><b>30</b><span>Years</span></div><div><b id="artCount">100+</b><span>Artists</span></div></div>
+        <form class="gal-search" style="margin-top:40px" action="galleries.html">
+          <input class="finput" name="q" placeholder="Town, city or postcode area" aria-label="Find a gallery">
+          <button class="btn">Find a gallery</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script src="assets/js/home.js"></script>
+</body>
+</html>

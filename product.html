@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Artwork — Castle Fine Art</title>
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="shop">
+<main id="main">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb" style="padding-top:32px" id="crumbs"></nav>
+    <div class="pdp" id="pdp"></div>
+  </div>
+
+  <section class="section section--cotton" id="artistBlock" hidden>
+    <div class="wrap split-2" id="artistInner"></div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section__head">
+        <div><p class="eyebrow" id="moreEyebrow">More from the artist</p><h2 class="display" id="moreTitle">You may also like</h2></div>
+        <div class="rail-nav" id="moreNav"><button data-dir="-1" aria-label="Previous"></button><button data-dir="1" aria-label="Next"></button></div>
+      </div>
+      <div class="rail" id="moreRail" data-nav="#moreNav"></div>
+    </div>
+  </section>
+  <div class="lightbox" id="lb"><button class="lightbox__close" id="lbClose">Close ×</button><img id="lbImg" alt=""></div>
+</main>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  const D = CFA, U = CFAUI, { $, $$, esc, money, img, ICON } = U;
+  const p = U.byHandle.get(U.param('p')) || D.products[0];
+  const artist = U.bySlug.get(p.as);
+  document.title = `${p.t} by ${p.a} — Castle Fine Art`;
+
+  $('#crumbs').innerHTML = `<a href="index.html">Home</a><span>/</span><a href="shop.html?type=${encodeURIComponent(p.ty)}">${esc(p.ty)}</a><span>/</span><a href="shop.html?artist=${p.as}">${esc(p.a)}</a><span>/</span><span>${esc(p.t)}</span>`;
+
+  // First image is the product cut-out (contain on cotton); later ones are usually room / detail shots (cover)
+  const pics = p.img;
+  let v = p.v.find(x => x.av) || p.v[0];
+  const optName = p.opt && p.opt !== 'Title' ? p.opt : null;
+
+  $('#pdp').innerHTML = `
+    <div class="pdp__gallery">
+      <div class="thumbs" id="thumbs">${pics.map((s, i) => `<button class="${i ? '' : 'on'}" data-i="${i}" aria-label="Image ${i + 1}"><img src="${img(s, 160)}" alt=""></button>`).join('')}</div>
+      <div class="stage" id="stage">
+        ${pics.map((s, i) => `<img class="${i ? 'cover' : ''}${i ? '' : ' on'}" src="${img(s, 1400)}" ${i ? 'loading="lazy"' : ''} alt="${esc(p.t)} — image ${i + 1}">`).join('')}
+        ${pics.length > 1 ? `<div class="stage__arrows"><button data-step="-1" aria-label="Previous image">${ICON.arrowL}</button><button data-step="1" aria-label="Next image">${ICON.arrowR}</button></div>` : ''}
+        <div class="stage__hint">${ICON.zoom} Click to enlarge</div>
+      </div>
+    </div>
+    <div class="pdp__info reveal in">
+      <div class="card__artist"><a href="artist.html?a=${p.as}">${esc(p.a)}</a></div>
+      <h1>${esc(p.t)}</h1>
+      <div class="price" id="price"></div>
+      <p class="finance-note" id="fin"></p>
+      <div class="stock${p.av ? '' : ' out'}" id="stock"></div>
+      <dl class="specs">
+        <dt>Type</dt><dd>${esc(p.ty)}</dd>
+        ${p.ed ? `<dt>Edition</dt><dd>Edition of ${p.ed}</dd>` : ''}
+        ${p.size ? `<dt>Size</dt><dd>${esc(p.size)}</dd>` : ''}
+        ${p.med ? `<dt>Medium</dt><dd>${esc(p.med)}</dd>` : ''}
+        <dt>Artist</dt><dd><a href="artist.html?a=${p.as}" style="text-decoration:underline">${esc(p.a)}</a></dd>
+      </dl>
+      ${optName && p.v.length > 1 ? `<span class="opt-label">${esc(optName)}</span><div class="opts" id="opts">${p.v.map(x => `<button data-v="${esc(x.n)}" class="${x === v ? 'on' : ''}"${x.av ? '' : ' style="opacity:.45"'}>${esc(x.n)}</button>`).join('')}</div>` : ''}
+      <div class="buy">
+        <button class="btn" id="addBtn"></button>
+        <a class="btn btn--ghost" href="contact.html?topic=consultant&p=${p.h}">Speak to an art consultant</a>
+      </div>
+      <div class="assure">
+        <div>${ICON.truck}<span>Free UK delivery · made to order, allow up to six weeks</span></div>
+        <div>${ICON.cert}<span>Certificate of authenticity included</span></div>
+        <div>${ICON.gallery}<span><a href="galleries.html" style="text-decoration:underline">See it in a gallery near you</a></span></div>
+      </div>
+      <details class="acc" open><summary>Description</summary><div class="acc__body">${p.d || '<p>Contact us for more details about this piece.</p>'}</div></details>
+      <details class="acc"><summary>Delivery &amp; returns</summary><div class="acc__body"><p>All our artwork is made to order in Birmingham, UK. Please allow up to six weeks for delivery. If you order several artworks they may arrive separately.</p><p>Not quite right? You can return most pieces within 14 days of delivery — see our full returns policy or ask your local gallery.</p></div></details>
+      <details class="acc"><summary>Payment &amp; finance</summary><div class="acc__body"><p>Spread the cost with interest-free finance: 0% APR, no deposit, subject to status. Ask in any gallery or at checkout.</p></div></details>
+    </div>`;
+
+  function updateVariant() {
+    $('#price').innerHTML = money(v.p) + (v.c > v.p ? `<s>${money(v.c)}</s>` : '');
+    $('#fin').textContent = v.p >= 500 ? `Or from ${money(Math.ceil(v.p / 20 * 100) / 100)}/month over 20 months, 0% APR` : '';
+    $('#stock').innerHTML = `<i></i>${v.av ? 'In stock — ready to order' : 'Currently unavailable'}`;
+    $('#stock').classList.toggle('out', !v.av);
+    const b = $('#addBtn');
+    b.textContent = v.av ? 'Add to basket' : 'Enquire about this piece';
+    b.onclick = () => v.av ? U.addToBag(p.h, v.n) : location.href = `contact.html?topic=consultant&p=${p.h}`;
+  }
+  updateVariant();
+  $('#opts')?.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    v = p.v.find(x => x.n === b.dataset.v);
+    $$('#opts button').forEach(x => x.classList.toggle('on', x === b)); updateVariant();
+  });
+
+  // Gallery crossfade
+  const ims = $$('#stage > img'); let cur = 0;
+  function go(i) {
+    cur = (i + ims.length) % ims.length;
+    ims.forEach((m, k) => m.classList.toggle('on', k === cur));
+    $$('#thumbs button').forEach((b, k) => b.classList.toggle('on', k === cur));
+    $$('#thumbs button')[cur]?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }
+  $('#thumbs').onclick = e => { const b = e.target.closest('button'); if (b) go(+b.dataset.i); };
+  $('#stage').addEventListener('click', e => {
+    const s = e.target.closest('[data-step]'); if (s) { e.stopPropagation(); go(cur + +s.dataset.step); return; }
+    $('#lbImg').src = img(pics[cur], 2400); $('#lb').classList.remove('zoomed'); $('#lb').classList.add('open'); U.lock(true);
+  });
+  addEventListener('keydown', e => { if ($('#lb').classList.contains('open') || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; if (e.key === 'ArrowRight') go(cur + 1); if (e.key === 'ArrowLeft') go(cur - 1); });
+  // swipe on touch
+  let sx = null; $('#stage').addEventListener('touchstart', e => sx = e.touches[0].clientX, { passive: true });
+  $('#stage').addEventListener('touchend', e => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1)); sx = null; });
+  $('#lbImg').onclick = e => { e.stopPropagation(); $('#lb').classList.toggle('zoomed'); };
+  const closeLb = () => { $('#lb').classList.remove('open'); U.lock(false); };
+  $('#lbClose').onclick = closeLb; $('#lb').onclick = closeLb;
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
+
+  // Artist block
+  if (artist && (artist.bio.length || artist.portrait)) {
+    $('#artistBlock').hidden = false;
+    $('#artistInner').innerHTML = `
+      <div class="reveal-img" style="aspect-ratio:4/5;max-height:640px">${artist.portrait ? `<img src="${artist.portrait}" alt="${esc(artist.n)}" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%">` : `<img src="${img(artist.img, 1000)}" alt="" style="width:100%;height:100%;object-fit:cover">`}</div>
+      <div class="reveal"><p class="eyebrow">About the artist</p><h2 class="display">${esc(artist.n)}</h2>
+        <div class="bio" style="margin-top:24px">${artist.bio.slice(0, 2).map(x => `<p>${esc(x)}</p>`).join('')}</div>
+        <a class="btn btn--ghost" href="artist.html?a=${artist.s}">Read more &amp; see all work</a></div>`;
+  }
+
+  // More from the artist, topped up with similar pieces
+  let more = D.products.filter(x => x.as === p.as && x.h !== p.h && x.av);
+  if (more.length < 6) more = more.concat(D.products.filter(x => x.ty === p.ty && x.as !== p.as && x.av).slice(0, 10 - more.length));
+  else $('#moreTitle').textContent = `More by ${p.a}`;
+  if (more.every(x => x.as !== p.as)) $('#moreEyebrow').textContent = 'You may also like';
+  $('#moreRail').innerHTML = more.slice(0, 12).map(x => U.cardHtml(x)).join('');
+  $('#moreNav').children[0].innerHTML = ICON.arrowL; $('#moreNav').children[1].innerHTML = ICON.arrowR;
+  U.observe(); U.rails();
+})();
+</script>
+</body>
+</html>
