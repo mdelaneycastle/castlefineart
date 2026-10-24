@@ -57,6 +57,8 @@
 
   const names = D.artists.filter(a => a.count > 0).map(a => `<a href="artist.html?a=${a.s}">${esc(a.n)}</a><span class="dot">·</span>`).join('');
   $('#marquee').innerHTML = names + names;
+  // Constant gentle speed (~35px/s) however many artists there are
+  requestAnimationFrame(() => { const t = $('#marquee'); t.style.animationDuration = (t.scrollWidth / 2 / 35) + 's'; });
 
   $('#origGrid').innerHTML = U.spread(D.products.filter(p => p.ty === 'Original' && p.av && p.img[1]).filter(p => p.p >= 1500), 8, 1).map(p => U.cardHtml(p)).join('');
 
